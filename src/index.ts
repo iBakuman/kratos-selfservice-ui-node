@@ -110,7 +110,7 @@ register404Route(router)
 register500Route(router)
 app.use(baseUrl, router)
 
-const port = Number(process.env.PORT) || 3000
+const port = Number(process.env.PORT) || 4455
 
 let listener = (proto: "http" | "https") => () => {
   console.log(`Listening on ${proto}://0.0.0.0:${port}`)

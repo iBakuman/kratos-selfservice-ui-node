@@ -4,7 +4,8 @@ import expressWinston from "express-winston"
 import winston from "winston"
 
 const config = {
-  format: winston.format.json(),
+  level: 'silly',
+  format: winston.format.cli({ colors: { info: 'blue' } }),
   transports: [new winston.transports.Console()],
 }
 export const logger = winston.createLogger(config)
