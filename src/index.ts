@@ -144,6 +144,9 @@ if (
       key: fs.readFileSync(process.env.TLS_KEY_PATH),
     }
 
+    if (process.env.TLS_CA_CERT_PATH?.length) {
+      https.globalAgent.options.ca = fs.readFileSync(process.env.TLS_CA_CERT_PATH)
+    }
     https.createServer(options, app).listen(port, listener("https"))
   } else {
     app.listen(port, listener("http"))
