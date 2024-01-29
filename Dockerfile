@@ -1,16 +1,18 @@
-FROM node:20.10.0-bullseye-slim as builder
+FROM node:18.12.1-alpine
 
-WORKDIR /app
+RUN mkdir -p /usr/src/app
+WORKDIR /usr/src/app
 
-ENV PATH /app/node_modules/.bin:$PATH
+ARG LINK=no
 
-ARG LINK
+RUN adduser -S ory -D -u 10000 -s /bin/nologin
 
-COPY package.json ./
-COPY package-lock.json ./
-COPY .npmrc ./
+COPY package.json .
+COPY package-lock.json .
+
 RUN npm ci --fetch-timeout=600000
-COPY . ./
+
+COPY . /usr/src/app
 
 RUN if [ "$LINK" == "true" ]; then (cd ./contrib/sdk/generated; rm -rf node_modules; npm ci; npm run build); \
     cp -r ./contrib/sdk/generated/* node_modules/@ory/kratos-client/; \
@@ -18,21 +20,9 @@ RUN if [ "$LINK" == "true" ]; then (cd ./contrib/sdk/generated; rm -rf node_modu
 
 RUN npm run build
 
-FROM nginx:alpine
+USER 10000
 
-WORKDIR /usr/share/nginx
-EXPOSE 80
+ENTRYPOINT ["/bin/sh", "-c"]
+CMD ["npm run serve"]
 
-RUN apk upgrade --update \
-    && apk add -U tzdata \
-    && cp /usr/share/zoneinfo/Europe/Berlin /etc/localtime \
-    && apk del tzdata \
-    && rm -rf \
-    /var/cache/apk/*
-
-COPY deploy/start.sh start.sh
-COPY deploy/nginx.conf /etc/nginx/templates/default.conf.template
-
-COPY --from=builder /app/lib html
-
-CMD ["sh", "start.sh"]
+EXPOSE 3000
