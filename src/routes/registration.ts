@@ -6,16 +6,10 @@ import {
   isQuerySet,
   logger,
   redirectOnSoftError,
-  requireNoAuth,
   RouteCreator,
   RouteRegistrator,
 } from "../pkg"
-import { UiNodeInputAttributes } from "@ory/client"
 import { UserAuthCard } from "@ory/elements-markup"
-import {
-  filterNodesByGroups,
-  isUiNodeInputAttributes,
-} from "@ory/integrations/ui"
 
 // A simple express handler that shows the registration screen.
 export const createRegistrationRoute: RouteCreator =
@@ -79,21 +73,9 @@ export const createRegistrationRoute: RouteCreator =
             flow.oauth2_login_request.challenge,
           )
         }
-        const webAuthnHandler = filterNodesByGroups({
-          nodes: flow.ui.nodes,
-          groups: ["webauthn", "passkey"],
-          attributes: ["button"],
-          withoutDefaultAttributes: true,
-          withoutDefaultGroup: true,
-        })
-          .filter(({ attributes }) => isUiNodeInputAttributes(attributes))
-          .map(({ attributes }) => {
-            return (attributes as UiNodeInputAttributes).onclick
-          })
-          .filter((onClickAction) => !!onClickAction)
+
         res.render("registration", {
           nodes: flow.ui.nodes,
-          webAuthnHandler: webAuthnHandler,
           card: UserAuthCard(
             {
               flow,

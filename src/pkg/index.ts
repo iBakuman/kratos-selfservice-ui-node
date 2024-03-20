@@ -2,12 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 import { RouteOptionsCreator } from "./route"
 import sdk, { apiBaseUrl } from "./sdk"
+import { filterNodesByGroups } from "./ui_nodes"
 import {
   UiNode,
   ErrorAuthenticatorAssuranceLevelNotSatisfied,
+  OAuth2LogoutRequest,
 } from "@ory/client"
 import { ButtonLink, Divider, MenuLink, Typography } from "@ory/elements-markup"
-import { filterNodesByGroups } from "@ory/integrations/ui"
 import { AxiosError } from "axios"
 import { NextFunction, Response } from "express"
 import { UnknownObject } from "express-handlebars/types"
@@ -49,6 +50,15 @@ export const defaultConfig: RouteOptionsCreator = () => {
           trustedClients.indexOf(challenge.client?.client_id) > -1)
         ? true
         : false
+    },
+    shouldSkipLogoutConsent: (challenge) => {
+      return Boolean(
+        (
+          challenge.client as OAuth2LogoutRequest & {
+            skip_logout_consent: boolean
+          }
+        )?.skip_logout_consent,
+      )
     },
     ...sdk,
   }

@@ -10,12 +10,7 @@ import {
   RouteCreator,
   RouteRegistrator,
 } from "../pkg"
-import { UiNodeInputAttributes } from "@ory/client"
 import { UserSettingsScreen } from "@ory/elements-markup"
-import {
-  filterNodesByGroups,
-  isUiNodeInputAttributes,
-} from "@ory/integrations/ui"
 
 export const createSettingsRoute: RouteCreator =
   (createHelpers) => async (req, res, next) => {
@@ -77,18 +72,6 @@ export const createSettingsRoute: RouteCreator =
           nodes: flow.ui.nodes,
           nav: settingsScreen.Nav,
           settingsScreen: settingsScreen.Body,
-          webAuthnHandler: filterNodesByGroups({
-            nodes: flow.ui.nodes,
-            groups: ["webauthn", "passkey"],
-            attributes: ["button"],
-            withoutDefaultAttributes: true,
-            withoutDefaultGroup: true,
-          })
-            .filter(({ attributes }) => isUiNodeInputAttributes(attributes))
-            .map(({ attributes }) => {
-              return (attributes as UiNodeInputAttributes).onclick
-            })
-            .filter((c) => c !== undefined),
         })
       })
       .catch(redirectOnSoftError(res, next, initFlowUrl))
